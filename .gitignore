@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+# generated outputs
+*_edge_output.mp4
+*_edge_perspective.mp4
+*_edge_corners.json
+*_output.mp4
+*_output_perspective.mp4
+*_edges.json

@@ -60,6 +60,35 @@ python main.py --input video.mp4 --output cropped.mp4 --template-size 50 --smoot
 3. A perspective transform is applied to crop and correct the video
 4. Motion is smoothed using a low-pass filter
 
+## Edge-based cropping (handles off-screen corners)
+
+Corner tracking fails when a screen corner is **outside the frame** — you cannot
+click, template, or match a vertex you cannot see. `edge_crop.py` instead tracks
+points **along each edge** (top/right/bottom/left), fits a line per edge, and
+derives each corner as the **intersection of two edge lines** — which is valid
+even when the corner is off-screen. The perspective warp downstream is unchanged.
+
+```bash
+# headless (no GUI — works over SSH, e.g. on a remote workstation)
+python edge_crop.py sample.mp4 --edges edges.json --out cropped.mp4
+
+# interactive: click >=2 points along each edge in order top,right,bottom,left
+# ('n' next edge, ESC to run); selections are saved to <name>_edges.json
+python edge_crop.py sample.mp4 --pick
+```
+
+`edges.json`:
+
+```json
+{"edges": {"top": [[x,y],[x,y]], "right": [[x,y],[x,y]],
+           "bottom": [[x,y],[x,y]], "left": [[x,y],[x,y]]}}
+```
+
+Outputs: an annotated video, a perspective-corrected crop, and a per-frame
+`*_edge_corners.json`. The line/intersection math lives in `edge_geometry.py`
+(pure NumPy) and is covered by `test_edge_geometry.py`, including an off-screen
+corner case. Run the tests with `python -m pytest test_edge_geometry.py`.
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
